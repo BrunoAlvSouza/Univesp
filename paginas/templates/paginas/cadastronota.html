@@ -1,0 +1,292 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Basic -->
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <!-- Mobile Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <!-- Site Metas -->
+  <meta name="keywords" content="" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+
+  <title>Diário Escolar</title>
+
+  <!-- slider stylesheet -->
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.1.3/assets/owl.carousel.min.css" />
+
+  <!-- bootstrap core css -->
+  <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}">
+
+  <!-- fonts style -->
+  <link href="https://fonts.googleapis.com/css?family=Poppins:400,600,700&display=swap" rel="stylesheet">
+  <!-- Custom styles for this template -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <!-- responsive style -->
+  <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+</head>
+
+<body>
+
+  <style>
+    body {
+      background-color: #041858;
+    }
+  </style>
+  <div>
+
+    <!-- header section strats -->
+    <header class="header_section">
+      <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg custom_nav-container ">
+          <a class="navbar-brand" href="index.html">
+            <span>
+              Gerenciamento Escolar
+            </span>
+          </a>
+          </a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="s-1"> </span>
+            <span class="s-2"> </span>
+            <span class="s-3"> </span>
+          </button>
+
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <div class="d-flex mx-auto flex-column flex-lg-row align-items-center">
+              <ul class="navbar-nav  ">
+                <li class="nav-item active">
+                  <a class="nav-link" href="{% url "index" %}">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url "listagemnotas" %}">Notas dos Alunos</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url "cadastrofalta" %}">Registro de Faltas</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url "listagemfaltas" %}">Falta dos Alunos</a>
+                </li>
+              </ul>
+            </div>
+            <div class="quote_btn-container ">
+              <a href="">
+                <img src="images/call.png" alt="">
+                <span>
+                  Telefone : + 11 975273710
+                </span>
+              </a>
+              <form class="form-inline">
+                <button class="btn  my-2 my-sm-0 nav_search-btn" type="submit"></button>
+              </form>
+            </div>
+          </div>
+        </nav>
+      </div>
+    </header>
+    <!-- end header section -->
+
+    <!-- contact section -->
+    <section class="contact_section layout_padding" id="contactLink">
+      <div class="container">
+        <div class="heading_container">
+          <h2>
+            Cadastro de Notas
+          </h2>
+        </div>
+      </div>
+
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-6 col-md-8 mx-auto">
+            <form action="{% url 'cadastrar_notas' %}" method="POST">
+              {% csrf_token %}
+              <style>
+                .custom-input-maior1 {
+                  width: 100%;
+                }
+              </style>
+              <style>
+                .custom-input-maio2 {
+                  width: 120%;
+                }
+              </style>
+              <style>
+                .custom-input-medio {
+                  width: 80%;
+                }
+              </style>
+              <style>
+                .custom-input-menor {
+                  width: 20%;
+                }
+              </style>
+              <div class="form-group">
+                <label for="cpf_notas">CPF:</label>
+                <input type="text" class="form-control custom-input-maior1" id="cpf_notas" name="cpf_notas" required>
+              </div>
+              <div class="form-row">
+
+                <div class="form-group col-md-4">
+                  <label for="bimestre">Bimestre:</label>
+                  <select class="form-control" id="bimestre" name="bimestre" required>
+                    <option value="">Selecione o bimestre</option>
+                    <option value="1">1º Bimestre</option>
+                    <option value="2">2º Bimestre</option>
+                    <option value="3">3º Bimestre</option>
+                    <option value="4">4º Bimestre</option>
+                    <option value="5">5º Bimestre</option>
+                    <option value="6">6º Bimestre</option>
+                  </select>
+                </div>
+
+                <div class="form-group col-md-4">
+                  <label for="atividade">Atividade:</label>
+                  <input type="text" class="form-control" id="atividade" name="atividade" required>
+                </div>
+
+                <div class="form-group col-md-4">
+                  <label for="nota">Nota:</label>
+                  <input type="text" class="form-control" id="nota" name="nota" required>
+                </div>
+              </div>  
+
+              <div>
+
+                <style>
+                  .form-row-space {
+                    margin-bottom: 3px;
+                  }
+                </style>
+          
+                <div class="d-flex justify-content-center mt-3">
+                  <button type="submit" class="btn btn-primary">Cadastrar</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- end contact section -->
+
+
+
+    <!-- info section -->
+    <section class="info_section layout_padding2">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="info_logo">
+              <h3>
+                Seotech
+              </h3>
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor indidunt ut labore et
+                dolore magna
+              </p>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="info_links">
+              <h4>
+                BASIC LINKS
+              </h4>
+              <ul class="  ">
+                <li class=" active">
+                  <a class="" href="index.html">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="">
+                  <a class="" href="about.html"> About</a>
+                </li>
+                <li class="">
+                  <a class="" href="service.html"> Services </a>
+                </li>
+                <li class="">
+                  <a class="" href="#contactLink">Contact Us</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="info_contact">
+              <h4>
+                CONTACT DETAILS
+              </h4>
+              <a href="">
+                <div class="img-box">
+                  <img src="{%static 'images/telephone-white.png' %}" width="12px" alt="">
+                </div>
+                <p>
+                  +01 1234567890
+                </p>
+              </a>
+              <a href="">
+                <div class="img-box">
+                  <img src="{%static 'images/envelope-white.png' %}" width="18px" alt="">
+                </div>
+                <p>
+                  demo@gmail.com
+                </p>
+              </a>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="info_form ">
+              <h4>
+                NEWSLETTER
+              </h4>
+              <form action="">
+                <input type="email" placeholder="Enter your email">
+                <button>
+                  Subscribe
+                </button>
+              </form>
+              <div class="social_box">
+                <a href="">
+                  <img src="{%static 'images/info-fb.png' %}" alt="">
+                </a>
+                <a href="">
+                  <img src="{%static 'images/info-twitter.png' %}" alt="">
+                </a>
+                <a href="">
+                  <img src="{%static 'images/info-linkedin.png' %}" alt="">
+                </a>
+                <a href="">
+                  <img src="{%static 'images/info-youtube.png' %}" alt="">
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- end info_section -->
+
+
+    <!-- footer section -->
+    <section class="container-fluid footer_section">
+      <div class="container">
+        <p>
+          &copy; <span id="displayYear"></span> All Rights Reserved By
+          <a href="https://html.design/">Free Html Templates</a>
+        </p>
+      </div>
+    </section>
+    <!-- footer section -->
+
+  </div>
+
+  <script type="text/javascript" src="{%static 'js/jquery-3.4.1.min.js' %}" ></script>
+  <script type="text/javascript" src="{%static 'js/bootstrap.js' %}" ></script>
+  <script type="text/javascript" src="{%static 'js/custom.js' %}" ></script>
+
+</body>
+
+</html>

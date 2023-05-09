@@ -1,0 +1,220 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<!-- Data tables CSS -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css">
+
+<!-- jQuery library -->
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+
+<!-- Data tables JavaScript -->
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js"></script>
+
+<!-- Translation for Portuguese language -->
+<script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.10.24/i18n/Portuguese-Brasil.json"></script>
+
+<head>
+  <!-- Basic -->
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <!-- Mobile Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <!-- Site Metas -->
+  <meta name="keywords" content="" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+
+  <title>Diário Escolar</title>
+  <!-- slider stylesheet -->
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.1.3/assets/owl.carousel.min.css" />
+
+  <!-- bootstrap core css -->
+  <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}">
+
+  <!-- fonts style -->
+  <link href="https://fonts.googleapis.com/css?family=Poppins:400,600,700&display=swap" rel="stylesheet">
+  <!-- Custom styles for this template -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <!-- responsive style -->
+  <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+</head>
+
+<body>
+
+  <style>
+    body {
+      background-color: #041858;
+    }
+  </style>
+
+  <div>
+
+    <!-- header section strats -->
+    <header class="header_section">
+      <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg custom_nav-container ">
+          <a class="navbar-brand" href="index.html">
+            <span>
+              Gerenciamento Escolar
+            </span>
+          </a>
+          </a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="s-1"> </span>
+            <span class="s-2"> </span>
+            <span class="s-3"> </span>
+          </button>
+
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <div class="d-flex mx-auto flex-column flex-lg-row align-items-center">
+              <ul class="navbar-nav  ">
+                <li class="nav-item active">
+                  <a class="nav-link" href="{% url "index" %}">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url "listagemfaltas" %}">Registrar de Faltas</a>
+                </li>
+              </ul>
+            </div>
+            <div class="quote_btn-container ">
+              <a href="">
+                <img src="images/call.png" alt="">
+                <span>
+                  Telefone : + 11 975273710
+                </span>
+              </a>
+              <form class="form-inline">
+                <button class="btn  my-2 my-sm-0 nav_search-btn" type="submit"></button>
+              </form>
+            </div>
+          </div>
+        </nav>
+      </div>
+    </header>
+    <!-- end header section -->
+    
+
+    <style>
+      #notas thead tr {
+        position: sticky;
+        top: 0;
+        background-color: #FFF;
+      }
+    </style>
+    
+    <div class="container">
+      <table id="notas" class="display" style="width:100%">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Data de Hoje</th>
+            <th>Nome Completo</th>
+            <th>Classe</th>
+            <th>Atividade</th>
+            <th>Nota</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for nota in notas %}
+            <tr>
+              <td>{{ nota.id_nota }}</td>
+              <td>{{ nota.datahoje_nota }}</td>
+              <td>{{ nota.nomecompleto_nota }}</td>
+              <td>{{ nota.classe_nota }}</td>
+              <td><input type="text" name="atividade" value="{{ nota.atividade_nota }}"></td>
+              <td><input type="text" name="nota" value="{{ nota.nota_nota }}"></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    
+    <script>
+      $(document).ready(function() {
+          var table = $('#notas').DataTable({
+              'ajax': '{% url "notas_json" %}',
+              'columns': [
+                  {'data': 'id_nota'},
+                  {'data': 'datahoje_nota'},
+                  {'data': 'nomecompleto_nota'},
+                  {'data': 'classe_nota'},
+                  {
+                      'data': 'atividade_nota',
+                      'render': function(data, type, row) {
+                          return '<input type="text" name="atividade" value="' + data + '">';
+                      }
+                  },
+                  {
+                      'data': 'nota_nota',
+                      'render': function(data, type, row) {
+                          return '<input type="text" name="nota" value="' + data + '">';
+                      }
+                  }
+              ],
+              'pageLength': 10,
+              'lengthMenu': [10, 25, 50, 100],
+              'language': {
+                  'url': 'https://cdn.datatables.net/plug-ins/1.10.24/i18n/Portuguese-Brasil.json'
+              }
+          });
+  
+          $('#atualizar-notas').on('click', function() {
+              $.ajax({
+                  url: '{% url "atualizar_lista_notas" %}',
+                  method: 'GET',
+                  success: function(data) {
+                      table.ajax.reload();
+                      alert('Lista de notas atualizada com sucesso!');
+                  },
+                  error: function(xhr, status, error) {
+                      console.log(xhr.responseText);
+                  }
+              });
+          });
+  
+          $('#salvar-notas').on('click', function() {
+              var dados = [];
+              table.rows().every(function() {
+                  var row = this.node();
+                  var rowData = {
+                      'id_nota': $(row).find('td:eq(0)').text(),
+                      'datahoje_nota': $(row).find('td:eq(1)').text(),
+                      'nomecompleto_nota': $(row).find('td:eq(2)').text(),
+                      'classe_nota': $(row).find('td:eq(3)').text(),
+                      'atividade_nota': $(row).find('td:eq(4) input').val(),
+                      'nota_nota': $(row).find('td:eq(5) input').val()
+                  };
+                  dados.push(rowData);
+              });
+  
+              $.ajax({
+                  url: '{% url "salvar_notas" %}',
+                  method: 'POST',
+                  data: {
+                      'csrfmiddlewaretoken': '{{ csrf_token }}',
+                      'dados': JSON.stringify(dados),
+                  },
+                  success: function(data) {
+                      table.ajax.reload();
+                      alert('Dados salvos com sucesso!');
+                  },
+                  error: function(xhr, status, error) {
+                      console.log(xhr.responseText);
+                  }
+              });
+          });
+      });
+    </script>
+  
+
+    
+    <div class="container">
+      <button id="atualizar-notas" class="btn btn-secondary">Atualizar</button>
+      <button id="salvar-notas" class="btn btn-primary">Salvar</button>
+    </div>
+
+    
+</body>
+</html>
