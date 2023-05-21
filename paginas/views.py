@@ -1,65 +1,88 @@
 from django.views.generic import TemplateView
-from django.shortcuts import render
-from .models import Cadastroaluno
-from .models import Cadastroprofessor
-from .models import Notas
-from .models import Faltas
-from django.http import HttpResponse
-from django.shortcuts import redirect
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Cadastroaluno, Cadastroprofessor, Notas, Faltas
+from django.http import HttpResponse, JsonResponse
 from django.core import serializers
 from datetime import date
 from django.views.decorators.csrf import csrf_exempt
 import json
-from datetime import date
-from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib import messages
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django import forms
+from django.contrib.auth.models import User, Group
+from django.contrib import messages
 
 
+def in_professores_group(user):
+    return 'Professores' in [group.name for group in user.groups.all()]
 
+def in_secretaria_group(user):
+    return 'Secretaria' in [group.name for group in user.groups.all()]
 
-class PaginaInicial(TemplateView):
-    template_name= "paginas/index.html"
-    
-class SobreView(TemplateView):
-    template_name="paginas/sobre.html"
+@login_required
+def pagina_inicial(request):
+    return render(request, 'paginas/index.html')
 
-class CadastroalunoView(TemplateView):
-    template_name="paginas/cadastroaluno.html"
-    
-class CadastroprofessorView(TemplateView):
-    template_name="paginas/cadastroprofessor.html"
-    
-class CadastronotaView(TemplateView):
-    template_name="paginas/cadastronota.html"
-    
-class CadastrofaltaView(TemplateView):
-    template_name="paginas/cadastrofalta.html"
-    
-class NotasView(TemplateView):
-    template_name="paginas/notas.html"
-    
-class AreadoprofessorView(TemplateView):
-    template_name="paginas/areadoprofessor.html"
-    
-class AreadasecretariaView(TemplateView):
-    template_name="paginas/areadasecretaria.html"
-    
-class AreadoalunoView(TemplateView):
-    template_name="paginas/areadoaluno.html"
+@login_required
+def sobre(request):
+    return render(request, 'paginas/sobre.html')
 
-class CadastroturmaView(TemplateView):
-    template_name="paginas/cadastroturma.html"
+@login_required
+@user_passes_test(in_secretaria_group)
+def cadastro_aluno(request):
+    return render(request, 'paginas/cadastroaluno.html')
 
+@login_required
+@user_passes_test(in_secretaria_group)
+def cadastro_professor(request):
+    return render(request, 'paginas/cadastroprofessor.html')
+
+@login_required
+@user_passes_test(in_professores_group)
+def cadastro_nota(request):
+    return render(request, 'paginas/cadastronota.html')
+
+@login_required
+@user_passes_test(in_professores_group)
+def cadastro_falta(request):
+    return render(request, 'paginas/cadastrofalta.html')
+
+@login_required
+@user_passes_test(in_professores_group)
+def notas(request):
+    return render(request, 'paginas/notas.html')
+
+@login_required
+@user_passes_test(in_professores_group)
+def area_professor(request):
+    return render(request, 'paginas/areadoprofessor.html')
+
+@login_required
+@user_passes_test(in_secretaria_group)
+def area_secretaria(request):
+    return render(request, 'paginas/areadasecretaria.html')
+
+@login_required
+@user_passes_test(in_secretaria_group)
+def area_aluno(request):
+    return render(request, 'paginas/areadoaluno.html')
+
+@login_required
+@user_passes_test(in_secretaria_group)
+def cadastro_turma(request):
+    return render(request, 'paginas/cadastroturma.html')
+
+@login_required
+@user_passes_test(in_secretaria_group)
 def selecaoturma(request):
     alunos = Cadastroaluno.objects.all()
     context = {'alunos': alunos}
     return render(request, 'selecaoturma.html', context)
 
-  
+@login_required
+@user_passes_test(in_professores_group)
+@user_passes_test(in_secretaria_group)
 def aluno(request):
     if request.method=='POST':
         novo_aluno = Cadastroaluno()
@@ -70,7 +93,8 @@ def aluno(request):
         novo_aluno.save()
     return redirect('/listagemalunos/')
 
-def alunos_json(request):
+
+#def alunos_json(request):
     alunos = Cadastroaluno.objects.all()
     data = []
     for aluno in alunos:
@@ -83,14 +107,23 @@ def alunos_json(request):
         })
     return JsonResponse({'data': data})
 
-class ListagemalunoView(TemplateView):
+@login_required
+@user_passes_test(in_secretaria_group)
+def listagem_alunos(request):
     template_name = "paginas/listagemalunos.html"
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        alunos = Cadastroaluno.objects.all()
-        context["alunos"] = alunos
-        return context
+    alunos = Cadastroaluno.objects.all()
+    context = {"alunos": alunos}
+    return render(request, template_name, context)
 
+@login_required
+def listagem_turma_professor(request):
+    template_name = "paginas/listagemturmaprofessor.html"
+    alunos = Cadastroprofessor.objects.all()
+    context = {"alunos": alunos}
+    return render(request, template_name, context)
+
+@login_required
+@user_passes_test(in_secretaria_group)
 def processar_lote(request):
     if request.method == 'POST':
         classe = request.POST.get('classe')
@@ -104,31 +137,33 @@ def processar_lote(request):
     else:
         return render(request, 'formulario_lote.html')
 
-    
-class ListagemnotaView(TemplateView):
+@login_required
+@user_passes_test(in_professores_group)
+def listagem_notas(request):
     template_name = "paginas/listagemnotas.html"
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        notas = Notas.objects.all()
-        context["notas"] = notas
-        return context
-    
-class ListagemfaltaView(TemplateView):
+    notas = Notas.objects.all()
+    context = {"notas": notas}
+    return render(request, template_name, context)
+
+@login_required
+@user_passes_test(in_professores_group)
+def listagem_faltas(request):
     template_name = "paginas/listagemfaltas.html"
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        faltas = Faltas.objects.all()
-        context["faltas"] = faltas
-        return context
+    faltas = Faltas.objects.all()
+    context = {"faltas": faltas}
+    return render(request, template_name, context)
 
-class ListagemturmaView(TemplateView):
+@login_required
+@user_passes_test(in_secretaria_group)
+def listagem_turmas(request):
     template_name = "paginas/listagemturmas.html"
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        turmas = Cadastroaluno.objects.all()
-        context["turma"] = turmas
-        return context
+    turmas = Cadastroaluno.objects.all()
+    context = {"turma": turmas}
+    return render(request, template_name, context)
 
+@login_required
+@user_passes_test(in_secretaria_group)
+@user_passes_test(in_professores_group)
 def cadastrar_notas(request):
     if request.method == 'POST':
         cpf_notas = request.POST['cpf_notas']
@@ -139,7 +174,10 @@ def cadastrar_notas(request):
         print(cpf_notas, bimestre, atividade, nota)
         notas.save()
         return redirect('/cadastronota/')
-    
+
+@login_required
+@user_passes_test(in_secretaria_group)
+@user_passes_test(in_professores_group)
 def cadastrar_faltas(request):
     if request.method == 'POST':
         cpf_faltas = request.POST['cpf_faltas']
@@ -149,7 +187,8 @@ def cadastrar_faltas(request):
         print(cpf_faltas, data_faltas, presenca_faltas)
         faltas.save()
         return redirect('/cadastrofalta/')
-    
+
+@login_required
 def cadastrar_alunos(request):
     if request.method == 'POST':
         cpf_aluno = request.POST['cpf_aluno']
@@ -166,36 +205,61 @@ def cadastrar_alunos(request):
         cadastro.save()
         return redirect('/cadastroaluno/')
 
+@login_required
+@user_passes_test(in_secretaria_group)
 def cadastrar_professores(request):
     if request.method == 'POST':
-        cpf_professor = request.POST['cpf_professor']
-        nomecompleto_professor = request.POST['nomecompleto_professor']
-        datadenascimento_professor = request.POST['datadenascimento_professor']
-        rua_professor = request.POST['rua_professor']
-        numero_professor = request.POST['numero_professor']
-        bairro_professor = request.POST['bairro_professor']
-        municipio_professor = request.POST['municipio_professor']
-        formacao_professor = request.POST['formacao_professor']
-        email_professor = request.POST['email_professor']
+        # Cria o usuário
+        username = request.POST['username']
+        password = request.POST['password1']
+        password2 = request.POST['password2']
 
-        cadastro = Cadastroprofessor(
-            cpf_professor=cpf_professor,
-            nomecompleto_professor=nomecompleto_professor,
-            datadenascimento_professor=datadenascimento_professor,
-            rua_professor=rua_professor,
-            numero_professor=numero_professor,
-            bairro_professor=bairro_professor,
-            municipio_professor=municipio_professor,
-            formacao_professor=formacao_professor,
-            email_professor=email_professor
+        if password != password2:
+            # Senhas não combinam
+            return HttpResponse("Senhas não combinam")
+
+        user = User.objects.create_user(username=username, password=password)
+        user.save()
+
+        # Determine o grupo com base no prefixo do username
+        if username.startswith("sc-"):
+            group_name = 'Secretaria'
+        elif username.startswith("pf-"):
+            group_name = 'Professores'
+        else:
+            return HttpResponse("Nome de usuário inválido. Deve começar com 'sc-' para Secretaria ou 'pf-' para Professores.")
+
+        # Cria o grupo se necessário e adiciona o usuário a ele
+        group, created = Group.objects.get_or_create(name=group_name)
+        group.user_set.add(user)
+
+        # Cria o registro do professor
+        professor = Cadastroprofessor(
+            user=user,
+            cpf_professor=request.POST['cpf_professor'],
+            nomecompleto_professor=request.POST['nomecompleto_professor'],
+            datadenascimento_professor=request.POST['datadenascimento_professor'],
+            rua_professor=request.POST['rua_professor'],
+            numero_professor=request.POST['numero_professor'],
+            bairro_professor=request.POST['bairro_professor'],
+            municipio_professor=request.POST['municipio_professor'],
+            formacao_professor=request.POST['formacao_professor'],
+            email_professor=request.POST['email_professor'],
+            # classe_professor=request.POST['classe_professor'], # Adicione este campo ao formulário se necessário
         )
-        cadastro.save()
-        return redirect('/cadastroprofessor/')
+        professor.save()
+
+        return redirect('login')
+    else:
+        return render(request, 'paginas/cadastrar_professores.html')
 
 
+@login_required
+@user_passes_test(in_professores_group)
 def notas_json(request):
     hoje = date.today()
-    notas = Notas.objects.filter(datahoje_nota=hoje)
+    professor = Cadastroprofessor.objects.get(user=request.user)
+    notas = Notas.objects.filter(datahoje_nota=hoje, classe_nota=professor.classe_professor)
     data = {'data': []}
     for nota in notas:
         datahoje_formatado = nota.datahoje_nota.strftime('%d-%m-%Y')
@@ -210,9 +274,13 @@ def notas_json(request):
     return JsonResponse(data)
 
 
+
+@login_required
+@user_passes_test(in_professores_group)
 def faltas_json(request):
     hoje = date.today()
-    faltas = Faltas.objects.filter(datahoje_falta=hoje)
+    professor = Cadastroprofessor.objects.get(user=request.user)
+    faltas = Faltas.objects.filter(datahoje_falta=hoje, classe_falta=professor.classe_professor)
     data = {'data': []}
     for falta in faltas:
         datahoje_formatado = falta.datahoje_falta.strftime('%d-%m-%Y')
@@ -228,7 +296,8 @@ def faltas_json(request):
 
 
 
-
+@login_required
+@user_passes_test(in_secretaria_group)
 def alunos_json(request):
     alunos = Cadastroaluno.objects.all()
     data = {
@@ -249,22 +318,33 @@ def alunos_json(request):
     }
     return JsonResponse(data)
 
+@login_required
+@user_passes_test(in_secretaria_group)
+@user_passes_test(in_professores_group)
 def excluir_aluno(request, id_aluno):
     aluno = get_object_or_404(Cadastroaluno, id_aluno=id_aluno)
     aluno.delete()
     return redirect('listagemalunos')
 
+@login_required
+@user_passes_test(in_professores_group)
 def excluir_nota(request, id_notas):
     nota = get_object_or_404(Notas, id_notas=id_notas)
     nota.delete()
     return redirect('listagemnotas')
 
+@login_required
+@user_passes_test(in_secretaria_group)
+@user_passes_test(in_professores_group)
 def excluir_falta(request, id_faltas):
     falta = get_object_or_404(Faltas, id_faltas=id_faltas)
     falta.delete()
     return redirect('listagemfaltas')
 
+
 #Busca os dados do Cadastro aluno para aparecer na página de cadastro de turmas 
+@login_required
+@user_passes_test(in_secretaria_group)
 def turmas_json(request):
     turmas = Cadastroaluno.objects.all()
     data = {'data': []}
@@ -278,7 +358,24 @@ def turmas_json(request):
         })  
     return JsonResponse(data)
 
+@login_required
+def turmasprofessor_json(request):
+    professores = Cadastroprofessor.objects.all()
+    data = {'data': []}
+    for professor in professores:
+        data['data'].append({
+            'id_professor': professor.id_professor,
+            'cpf_professor': professor.cpf_professor,
+            'nomecompleto_professor': professor.nomecompleto_professor,
+            'classe_professor': professor.classe_professor,
+            'bairro_professor': professor.bairro_professor
+        })
+    return JsonResponse(data)
+
+
 #Salva o dado no banco em Classe
+@login_required
+@user_passes_test(in_secretaria_group)
 def associar_aluno(request, id_aluno):
     classe = request.POST['classe_turma']
     print(classe)
@@ -287,6 +384,8 @@ def associar_aluno(request, id_aluno):
     aluno.save()
     return redirect('listagemturmas')
 
+@login_required
+@user_passes_test(in_secretaria_group)
 def atualizar_lista(request):
     dados_aluno = Cadastroaluno.objects.all()
 
@@ -301,9 +400,11 @@ def atualizar_lista(request):
             dados_falta.save()
 
     # Renderiza um template simples de confirmação
-    return redirect(request, 'listagemfaltas')
+    return HttpResponse('Lista de notas atualizada com sucesso!')
 
-
+@login_required
+@user_passes_test(in_secretaria_group)
+@user_passes_test(in_professores_group)
 def atualizar_lista_notas(request):
     dados_aluno = Cadastroaluno.objects.all()
 
@@ -320,7 +421,9 @@ def atualizar_lista_notas(request):
     return HttpResponse('Lista de notas atualizada com sucesso!')
 
 
-
+@login_required
+@user_passes_test(in_secretaria_group)
+@user_passes_test(in_professores_group)
 @csrf_exempt
 def salvar_presenca(request):
     if request.method == "POST":
@@ -338,7 +441,9 @@ def salvar_presenca(request):
         return JsonResponse({"success": False, "message": "Método não permitido"})
     
 
-
+@login_required
+@user_passes_test(in_secretaria_group)
+@user_passes_test(in_professores_group)
 def salvar_notas(request):
     if request.method == 'POST':
         data = json.loads(request.POST['dados'])
@@ -353,7 +458,9 @@ def salvar_notas(request):
     else:
         return JsonResponse({"success": False, "error": "Invalid request method"})
     
-    
+@login_required
+@user_passes_test(in_secretaria_group)
+@user_passes_test(in_professores_group)
 def registro(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
@@ -366,6 +473,9 @@ def registro(request):
         form = UserCreationForm()
     return render(request, 'paginas/registro.html', {'form': form})
 
+@login_required
+@user_passes_test(in_secretaria_group)
+@user_passes_test(in_professores_group)
 def login(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -379,3 +489,65 @@ def login(request):
             messages.error(request, 'Usuário ou senha inválidos')
 
     return render(request, 'paginas/login.html')
+
+@login_required
+def selecionar_turma(request, id_professor):
+    classe = request.POST['classe_professor']
+    professor = Cadastroprofessor.objects.get(pk=id_professor)
+    professor.classe_professor = classe
+    professor.save()
+    return redirect('listagemturmaprofessor')
+
+@login_required
+@user_passes_test(in_secretaria_group)
+@user_passes_test(in_professores_group)
+class ProfessorRegistrationForm(UserCreationForm):
+    cpf_professor = forms.CharField(max_length=11, required=True)
+    nomecompleto_professor = forms.CharField(max_length=100, required=True)
+    datadenascimento_professor = forms.DateField(required=True)
+    rua_professor = forms.CharField(max_length=100, required=True)
+    numero_professor = forms.CharField(max_length=100, required=True)
+    bairro_professor = forms.CharField(max_length=100, required=True)
+    municipio_professor = forms.CharField(max_length=100, required=True)
+    formacao_professor = forms.CharField(max_length=100, required=True)
+    email_professor = forms.EmailField(max_length=254, required=True)
+    classe_professor = forms.ChoiceField(choices=Cadastroprofessor.classe_choices_professor, required=True)
+
+    class Meta:
+        model = User
+        fields = ['username', 'password1', 'password2', 'cpf_professor', 'nomecompleto_professor', 'datadenascimento_professor', 'rua_professor', 'numero_professor', 'bairro_professor', 'municipio_professor', 'formacao_professor', 'email_professor', 'classe_professor']
+
+@login_required
+@user_passes_test(in_secretaria_group)
+@user_passes_test(in_professores_group)
+def register_professor(request):
+    if request.method == 'POST':
+        form = ProfessorRegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save()  # Aqui estava o problema
+            group, created = Group.objects.get_or_create(name='Professores')
+            group.user_set.add(user)
+
+            professor = Cadastroprofessor(
+                user=user,
+                cpf_professor=form.cleaned_data.get('cpf_professor'),
+                nomecompleto_professor=form.cleaned_data.get('nomecompleto_professor'),
+                datadenascimento_professor=form.cleaned_data.get('datadenascimento_professor'),
+                rua_professor=form.cleaned_data.get('rua_professor'),
+                numero_professor=form.cleaned_data.get('numero_professor'),
+                bairro_professor=form.cleaned_data.get('bairro_professor'),
+                municipio_professor=form.cleaned_data.get('municipio_professor'),
+                formacao_professor=form.cleaned_data.get('formacao_professor'),
+                email_professor=form.cleaned_data.get('email_professor'),
+                classe_professor=form.cleaned_data.get('classe_professor'),
+            )
+
+            professor.save()
+
+            messages.success(request, f'Conta de professor criada com sucesso para {form.cleaned_data.get("username")}! Você pode fazer login agora.')
+            return redirect('login')
+    else:
+        form = ProfessorRegistrationForm()
+    return render(request, 'paginas/registro.html', {'form': form})
+
+

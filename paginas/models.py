@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.auth.models import User
 
 
 class Cadastroaluno(models.Model):
@@ -25,6 +26,7 @@ class Cadastroaluno(models.Model):
     professor_aluno = models.CharField(max_length=100, null=True)
     
 class Cadastroprofessor(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
     id_professor = models.AutoField(primary_key=True, unique=True)
     cpf_professor = models.CharField(max_length=11, null=False)
     nomecompleto_professor = models.CharField(max_length=100, null=True)

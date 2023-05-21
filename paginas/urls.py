@@ -1,27 +1,36 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from .views import PaginaInicial, CadastroprofessorView, registro, SobreView, ListagemturmaView, CadastroturmaView, CadastroalunoView, CadastrofaltaView,  AreadasecretariaView, ListagemfaltaView, ListagemalunoView, AreadoprofessorView, AreadoalunoView, NotasView, ListagemnotaView, CadastronotaView, cadastrar_professores, atualizar_lista_notas, salvar_notas, salvar_presenca, associar_aluno, atualizar_lista, turmas_json, cadastrar_notas, cadastrar_faltas, selecaoturma, cadastrar_alunos, excluir_aluno, excluir_falta, excluir_nota, faltas_json, aluno, alunos_json, notas_json, processar_lote
+from .views import (
+    pagina_inicial, cadastro_professor, register_professor, turmasprofessor_json,
+    listagem_turma_professor, selecionar_turma, registro, sobre, listagem_turmas,
+    cadastro_turma, cadastro_aluno, cadastro_falta, area_secretaria,
+    listagem_faltas, listagem_alunos, area_professor, area_aluno, listagem_notas,
+    cadastro_nota, cadastrar_professores, atualizar_lista_notas, salvar_notas,
+    salvar_presenca, associar_aluno, atualizar_lista, turmas_json, cadastrar_notas,
+    cadastrar_faltas, cadastrar_alunos, excluir_aluno, excluir_falta, excluir_nota,
+    faltas_json, alunos_json, notas_json
+)
 
 urlpatterns = [
-    #path('endereço/', MinhaView.as_view(), name='nome_da_url')
     path('', auth_views.LoginView.as_view(template_name='paginas/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('registro/', registro, name='registro'),
-    path('index', PaginaInicial.as_view(), name='index'),
+    path('index/', pagina_inicial, name='index'),
     path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
-    path('sobre/', SobreView.as_view(), name='sobre'),
-    path('areadoprofessor/', AreadoprofessorView.as_view(), name='areadoprofessor'),
-    path('areadoaluno/', AreadoalunoView.as_view(), name='areadoaluno'),
-    path('areadasecretaria/', AreadasecretariaView.as_view(), name='areadasecretaria'),
-    path('cadastroaluno/', CadastroalunoView.as_view(), name='cadastroaluno'),
-    path('cadastroprofessor/', CadastroprofessorView.as_view(), name='cadastroprofessor'),
-    path('cadastrofalta/', CadastrofaltaView.as_view(), name='cadastrofalta'),
-    path('cadastronota/', CadastronotaView.as_view(), name='cadastronota'),
-    path('cadastroturma/', CadastroturmaView.as_view(), name='cadastroturma'),
-    path('listagemalunos/', ListagemalunoView.as_view(), name='listagemalunos'),
-    path('listagemnotas/', ListagemnotaView.as_view(), name='listagemnotas'),  
-    path('listagemfaltas/', ListagemfaltaView.as_view(), name='listagemfaltas'),
-    path('listagemturmas/', ListagemturmaView.as_view(), name='listagemturmas'),
+    path('sobre/', sobre, name='sobre'),
+    path('areadoprofessor/', area_professor, name='areadoprofessor'),
+    path('areadoaluno/', area_aluno, name='areadoaluno'),
+    path('areadasecretaria/', area_secretaria, name='areadasecretaria'),
+    path('cadastroaluno/', cadastro_aluno, name='cadastroaluno'),
+    path('cadastroprofessor/', cadastro_professor, name='cadastroprofessor'),
+    path('cadastrofalta/', cadastro_falta, name='cadastrofalta'),
+    path('cadastronota/', cadastro_nota, name='cadastronota'),
+    path('cadastroturma/', cadastro_turma, name='cadastroturma'),
+    path('listagemalunos/', listagem_alunos, name='listagemalunos'),
+    path('listagemnotas/', listagem_notas, name='listagemnotas'),
+    path('listagemfaltas/', listagem_faltas, name='listagemfaltas'),
+    path('listagemturmas/', listagem_turmas, name='listagemturmas'),
+    path('listagemturmaprofessor/', listagem_turma_professor, name='listagemturmaprofessor'),
     path('turmas_json/', turmas_json, name='turmas_json'),
     path('notas_json/', notas_json, name='notas_json'),
     path('faltas_json/', faltas_json, name='faltas_json'),
@@ -37,5 +46,8 @@ urlpatterns = [
     path('salvar_presenca/', salvar_presenca, name='salvar_presenca'),
     path('atualizar_lista_notas/', atualizar_lista_notas, name='atualizar_lista_notas'),
     path('salvar_notas/', salvar_notas, name='salvar_notas'),
-    path('cadastrar_professores/', cadastrar_professores, name='cadastrar_professores')
-    ]
+    path('cadastrar_professores/', cadastrar_professores, name='cadastrar_professores'),
+    path('selecionar_turma/<int:id_professor>/', selecionar_turma, name='selecionar_turma'),
+    path('turmasprofessor_json/', turmasprofessor_json, name='turmasprofessor_json'),
+    path('register/', register_professor, name='register_professor'),
+]

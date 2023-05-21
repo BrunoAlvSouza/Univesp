@@ -1,0 +1,197 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<!-- Data tables CSS -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css">
+
+<!-- jQuery library -->
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+
+<!-- Data tables JavaScript -->
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js"></script>
+
+<!-- Translation for Portuguese language -->
+<script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.10.24/i18n/Portuguese-Brasil.json"></script>
+
+<head>
+  <!-- Basic -->
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <!-- Mobile Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <!-- Site Metas -->
+  <meta name="keywords" content="" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+
+  <title>Diário Escolar</title>
+  <!-- slider stylesheet -->
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.1.3/assets/owl.carousel.min.css" />
+
+  <!-- bootstrap core css -->
+  <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}">
+
+  <!-- fonts style -->
+  <link href="https://fonts.googleapis.com/css?family=Poppins:400,600,700&display=swap" rel="stylesheet">
+  <!-- Custom styles for this template -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <!-- responsive style -->
+  <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+</head>
+
+<body>
+
+    <style>
+        body {
+        background-color: #041858;
+        }
+    </style>
+    <div>
+        <!-- header section strats -->
+        <header class="header_section">
+        <div class="container-fluid">
+            <nav class="navbar navbar-expand-lg custom_nav-container ">
+            <a class="navbar-brand" href="index.html">
+                <span>
+                Gerenciamento Escolar
+                </span>
+            </a>
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="s-1"> </span>
+                <span class="s-2"> </span>
+                <span class="s-3"> </span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <div class="d-flex mx-auto flex-column flex-lg-row align-items-center">
+                <ul class="navbar-nav  ">
+                    <li class="nav-item active">
+                    <a class="nav-link" href="{% url "index" %}">Home <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                    <a class="nav-link" href="{% url "cadastroaluno" %}"> Cadastro de Alunos </a>
+                    </li>
+                    <li class="nav-item">
+                    <a class="nav-link" href="{% url "listagemturmas" %}"> Seleção de Turmas </a>
+                    </li>
+                    <li class="nav-item">
+                    <a class="nav-link" href="{% url "cadastroaluno" %}"> Associação Professor </a>
+                    </li>
+                </ul>
+                </div>
+                <div class="quote_btn-container ">
+                <a href="">
+                    <img src="images/call.png" alt="">
+                    <span>
+                    Telefone : + 11 975273710
+                    </span>
+                </a>
+                <form class="form-inline">
+                    <button class="btn  my-2 my-sm-0 nav_search-btn" type="submit"></button>
+                </form>
+                </div>
+            </div>
+            </nav>
+        </div>
+        </header>
+        <!-- end header section -->
+      
+
+  <style>
+    #turmas thead tr {
+      position: sticky;
+      top: 0;
+      background-color: #FFF;
+    }
+  </style> 
+  
+  <div>
+    <div class="container">
+      <table id="turmas" class="display" style="width:100%">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>CPF</th>
+            <th>Nome Completo</th>
+            <th>Classe Atual</th>
+            <th>Bairro</th>
+            <th>Escolha Classe</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+  
+    <script>
+        $(document).ready(function () {
+            $('#turmas').DataTable({
+              'ajax': '{% url "turmasprofessor_json" %}',
+              'columns': [
+                { 'data': 'id_professor' },
+                { 'data': 'cpf_professor' },
+                { 'data': 'nomecompleto_professor' },
+                { 'data': 'classe_professor' },
+                { 'data': 'bairro_professor' },
+                {
+                    'data': null,
+                    'render': function (data, type, row) {
+                        return '<select id="select-' + row.id_professor + '" class="form-control" data-id-professor="' + row.id_professor + '" required>' +
+                            '<option value="">Selecione a opção</option>' +
+                            '<option value="turma1">Turma1</option>' +
+                            '<option value="turma2">Turma2</option>' +
+                            '<option value="turma3">Turma3</option>' +
+                            '<option value="turma4">Turma4</option>' +
+                            '<option value="turma5">Turma5</option>' +
+                            '<option value="turma6">Turma6</option>' +
+                            '</select>';
+                    }
+                }
+              ],
+              'pageLength': 10,
+              'lengthMenu': [10, 25, 50, 100],
+              'language': {
+                'url': 'https://cdn.datatables.net/plug-ins/1.10.24/i18n/Portuguese-Brasil.json'
+              }
+            });
+        
+            document.getElementById('salvar').addEventListener('click', function () {
+              var selects = document.querySelectorAll('select[data-id-professor]');
+              var count = 0;
+              selects.forEach(function (select) {
+                var id_professor = select.getAttribute('data-id-professor');
+                var classe_professor = select.value;
+                if (classe_professor) {
+                  count++;
+                  $.ajax({
+                    url: '/selecionar_turma/' + id_professor + '/',
+                    method: 'POST',
+                    data: {
+                      'csrfmiddlewaretoken': '{{ csrf_token }}',
+                      'classe_professor': classe_professor
+                    },
+                    success: function (data) {
+                      $('#turmas').DataTable().ajax.reload();
+                    },
+                    error: function (xhr, status, error) {
+                      console.log(xhr.responseText);
+                    }
+                  });
+                }
+              });
+        
+              if (!count) {
+                alert('Selecione uma opção de classe antes de associar.');
+              }
+            });
+          });
+        
+    </script>
+    <div class="container">
+      <button class="btn btn-primary" id="salvar">Salvar</button>
+    </div>
+  </div>
+  
+</body>
+</html>
